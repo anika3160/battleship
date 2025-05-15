@@ -1,0 +1,45 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/main.ts",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "nodemon",
+    "start:build": "npm run build && node build/main"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anika3160/battleship.git"
+  },
+  "keywords": [
+    "nodejs",
+    "js",
+    "ts",
+    "battleship",
+    "websocket"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anika3160/battleship/issues"
+  },
+  "homepage": "https://github.com/anika3160/battleship#readme",
+  "devDependencies": {
+  "@types/node": "^20.11.30",
+  "@types/ws": "^8.5.10",
+  "nodemon": "^3.1.0",
+  "ts-loader": "^9.5.1",
+  "ts-node": "^10.9.2",
+  "typescript": "^5.4.5"
+},
+"dependencies": {
+  "@types/uuid": "^9.0.7",
+  "dotenv": "^16.4.5",
+  "ws": "^8.17.0"
+}
+}
