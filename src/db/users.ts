@@ -8,7 +8,7 @@ const users: User[] = []
 
 export function createUser(name: string, password: string): User {
   const id = users.length + 1
-  const user = { name, password, id }
+  const user: User = { name, password, id }
   users.push(user)
   return user
 }

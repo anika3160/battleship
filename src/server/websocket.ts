@@ -1,13 +1,16 @@
 import { WebSocketServer, WebSocket } from 'ws'
-import { handleRegistration } from './handlers/index.js'
+import { handleRegistration, handleCreateRoom } from './handlers/index.js'
 import { manageGameEvents } from '../helpers/constants.js'
 import { parseJSONData } from '../helpers/utils.js'
+import { User, Room, addUserToRoom } from '../db/index.js'
 
 export function startWebSocketServer(port: number) {
   const server = new WebSocketServer({ port })
 
   server.on('connection', (ws: WebSocket, request: any, client: any) => {
     ws.send('Welcome!')
+    let currentUser: User | null = null;
+    let currentRoom: Room | undefined = undefined;
 
     ws.on('message', (data: any) => {
       const stringData = data.toString()
@@ -22,7 +25,16 @@ export function startWebSocketServer(port: number) {
       switch (dataObject.type) {
         case manageGameEvents.registration:
           console.log('Registration event received:', dataObject)
-          handleRegistration(ws, dataObject)
+          currentUser = handleRegistration(ws, dataObject)
+          break
+        case manageGameEvents.createRoom:
+          console.log('Create room event received:', dataObject)
+          currentRoom = handleCreateRoom(ws);
+          if (currentUser && currentRoom) {
+            addUserToRoom(currentRoom.roomId, {
+              name: currentUser.name, id: currentUser.id,
+            })
+          }
           break
         default:
           console.log('Unknown event type:', dataObject.type)

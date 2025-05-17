@@ -1,34 +1,52 @@
 import { WebSocket } from 'ws'
 import { parseJSONData } from '../../helpers/utils.js'
-import { createServerRegistrationResponse } from '../responses/registrationResponse.js'
-import { getUserByName, createUser } from '../../db.ts/index.js'
+import { getUserByName, createUser } from '../../db/index.js'
+import { sendResponse } from '../responses/index.js'
+import { manageGameEvents } from '../../helpers/constants.js'
+
 
 export function handleRegistration(ws: WebSocket, dataObject: any) {
   const registrationData = parseJSONData(dataObject.data)
   const { name, password } = registrationData || {}
 
   if (!name || !password) {
-    sendRegistrationResponse(ws, name || '', '', true, 'Name and password are required', dataObject.id)
-    return
-  }
+    sendResponse(
+      ws,
+      manageGameEvents.registration,
+      {
+        name,
+        index: '',
+        error: true,
+        errorText: 'Name and password are required'
+      },
+    )
+    return null
+ }
 
   if (getUserByName(name)) {
-    sendRegistrationResponse(ws, name, '', true, 'User already exists', dataObject.id)
-    return
+    sendResponse(
+      ws,
+      manageGameEvents.registration,
+      {
+        name,
+        index: '',
+        error: true,
+        errorText: 'User already exists'
+      },
+    )
+    return null
   }
 
   const user = createUser(name, password)
-  sendRegistrationResponse(ws, user.name, user.id, false, '', dataObject.id)
-}
-
-function sendRegistrationResponse(
-  ws: WebSocket,
-  name: string,
-  index: number | string,
-  error: boolean,
-  errorText: string,
-  id: number | string,
-) {
-  const response = createServerRegistrationResponse(name, index, error, errorText, id)
-  ws.send(JSON.stringify(response))
+  sendResponse(
+    ws,
+    manageGameEvents.registration,
+    {
+      name,
+      index: user.id,
+      error: false,
+      errorText: ''
+    },
+  )
+  return user
 }
