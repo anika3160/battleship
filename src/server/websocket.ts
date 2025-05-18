@@ -8,6 +8,7 @@ import { handleRegistration } from './handlers/registration.js'
 import { sendErrorResponse } from './responses/error.js'
 import { sendCreateGameResponse } from './responses/game.js'
 import { sendRoomsListResponse } from './responses/index.js'
+import { getUserSocket, removeUserSocket } from './wsSessions.js'
 
 export function startWebSocketServer(port: number) {
   const server = new WebSocketServer({ port })
@@ -74,6 +75,12 @@ export function startWebSocketServer(port: number) {
               break
             }
             sendCreateGameResponse(ws, currentRoom.id, currentUser.id)
+            for (const player of currentRoom.users) {
+              const ws = getUserSocket(player.id)
+              if (ws) {
+                sendCreateGameResponse(ws, currentRoom.id, player.id)
+              }
+            }
             break
           default:
             console.log('Unknown event type:', dataObject.type)
@@ -88,6 +95,10 @@ export function startWebSocketServer(port: number) {
 
     ws.on('close', () => {
       console.log('Connection closed.')
+      if (!currentUser) {
+        return
+      }
+      removeUserSocket(currentUser.id)
       currentUser = null
       currentRoom = undefined
     })
