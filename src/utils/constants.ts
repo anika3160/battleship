@@ -10,5 +10,7 @@ export enum manageGameEvents {
   getRoomsList = 'update_room',
   addUserToRoom = 'add_user_to_room',
   createGame = 'create_game',
+  addShips = 'add_ships',
+  startGame = 'start_game',
 }
   

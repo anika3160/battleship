@@ -2,28 +2,24 @@ import { WebSocket, WebSocketServer } from 'ws'
 import { Room, User } from '../db/models/index.js'
 import { manageGameEvents } from '../utils/constants.js'
 import { parseJSONData } from '../utils/utils.js'
-import { handleAddUserToRoom } from './handlers/addUsersToRoom.js'
-import { handleCreateRoom } from './handlers/createRoom.js'
 import { handleRegistration } from './handlers/registration.js'
 import { sendErrorResponse } from './responses/error.js'
-import { sendCreateGameResponse } from './responses/game.js'
 import { sendRoomsListResponse } from './responses/index.js'
-import { getUserSocket, removeUserSocket } from './wsSessions.js'
+import { removeUserSocket } from './wsSessions.js'
+import { handleCreateRoomEvent, handleAddUserToRoomEvent, handleAddShipsEvent } from './events/index.js'
 
 export function startWebSocketServer(port: number) {
   const server = new WebSocketServer({ port })
 
-  server.on('connection', (ws: WebSocket, request: any, client: any) => {
+  server.on('connection', (ws: WebSocket) => {
     let currentUser: User | null = null
     let currentRoom: Room | undefined = undefined
 
     ws.on('message', (data: any) => {
       try {
-        const stringData = data.toString()
-        const dataObject = parseJSONData(stringData)
+        const dataObject = parseJSONData(data.toString())
         console.log('Message from client:', dataObject)
         if (!dataObject?.type) {
-          console.log('DATA:', dataObject)
           sendErrorResponse(ws, 'Invalid message format')
           return
         }
@@ -32,60 +28,25 @@ export function startWebSocketServer(port: number) {
           case manageGameEvents.registration:
             currentUser = handleRegistration(ws, dataObject)
             break
+
           case manageGameEvents.createRoom:
-            if (!currentUser) {
-              sendErrorResponse(ws, 'User not registered')
-              break
-            }
-            currentRoom = handleCreateRoom(ws, currentUser)
+            handleCreateRoomEvent(ws, currentUser)
             break
+
           case manageGameEvents.getRoomsList:
-            console.log('Get rooms list event received:', dataObject)
             sendRoomsListResponse(ws)
             break
-          /*
-        { <-
-            type: "add_user_to_room",
-            data:
-                {
-                    indexRoom: <number | string>,
-                },
-            id: 0,
-        }
-        */
+
           case manageGameEvents.addUserToRoom:
-            if (!currentUser) {
-              sendErrorResponse(ws, 'User not registered')
-              break
-            }
-            let indexRoom
-            try {
-              indexRoom =
-                typeof dataObject.data === 'string'
-                  ? parseJSONData(dataObject.data).indexRoom
-                  : dataObject.data.indexRoom
-            } catch {
-              sendErrorResponse(ws, 'Invalid data for addUserToRoom')
-              break
-            }
-            // if 2 users in room, create game
-            currentRoom = handleAddUserToRoom(ws, indexRoom, currentUser)
-            if (!currentRoom || !currentUser) {
-              sendErrorResponse(ws, 'Room or user not found')
-              break
-            }
-            sendCreateGameResponse(ws, currentRoom.id, currentUser.id)
-            for (const player of currentRoom.users) {
-              const ws = getUserSocket(player.id)
-              if (ws) {
-                sendCreateGameResponse(ws, currentRoom.id, player.id)
-              }
-            }
+            handleAddUserToRoomEvent(ws, dataObject, currentUser)
             break
+
+          case manageGameEvents.addShips:
+            handleAddShipsEvent(ws, dataObject, currentUser)
+            break
+
           default:
-            console.log('Unknown event type:', dataObject.type)
             sendErrorResponse(ws, 'Unknown event type')
-            break
         }
       } catch (err: any) {
         console.error('WebSocket message error:', err)
@@ -95,10 +56,9 @@ export function startWebSocketServer(port: number) {
 
     ws.on('close', () => {
       console.log('Connection closed.')
-      if (!currentUser) {
-        return
+      if (currentUser) {
+        removeUserSocket(currentUser.id)
       }
-      removeUserSocket(currentUser.id)
       currentUser = null
       currentRoom = undefined
     })
