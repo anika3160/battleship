@@ -1,7 +1,7 @@
-import { manageGameEvents } from '../helpers/constants.js'
+import { manageGameEvents } from '../utils/constants.js'
 
 export interface ServerRegistrationResponse {
-  type: string 
+  type: string
   data: string
   id: number | string
 }

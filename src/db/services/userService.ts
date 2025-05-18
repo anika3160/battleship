@@ -1,10 +1,5 @@
-export interface User {
-  name: string
-  password: string
-  id: number
-}
-
-const users: User[] = []
+import { User } from "../models/index.js"
+import { users } from "../storage/users.js"
 
 export function createUser(name: string, password: string): User {
   const id = users.length + 1

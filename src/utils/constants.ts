@@ -9,5 +9,6 @@ export enum manageGameEvents {
   createRoom = 'create_room',
   getRoomsList = 'update_room',
   addUserToRoom = 'add_user_to_room',
+  createGame = 'create_game',
 }
   
