@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws'
-import { manageGameEvents } from '../../utils/constants.js'
+import { gameCommands, manageGameEvents } from '../../utils/constants.js'
 import { sendResponse } from './utils.js'
 
 export function sendCreateGameResponse(ws: WebSocket, idGame: string | number, idPlayer: string | number) {
@@ -8,7 +8,11 @@ export function sendCreateGameResponse(ws: WebSocket, idGame: string | number, i
     idPlayer,
   })
 }
-
+export function sendTurnInfo(ws: WebSocket, currentPlayer: string | number) {
+  sendResponse(ws, gameCommands.turn, {
+    currentPlayer,
+  })
+}
 /*
 {
     type: "create_game", //send for both players in the room, after they are connected to the room

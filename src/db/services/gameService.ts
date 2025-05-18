@@ -26,7 +26,7 @@ export function createGame(roomId: number | string): Game | undefined {
   const game: Game = {
     idGame: gameId,
     roomIndex: roomId,
-    players: [/* ... */],
+    players: [],
   }
   games.push(game)
   game.players = [createPlayer(player1.id, player1.id, gameId), createPlayer(player2.id, player2.id, gameId)]
