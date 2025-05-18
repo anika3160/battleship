@@ -1,8 +1,8 @@
 import { WebSocketServer, WebSocket } from 'ws'
-import { handleRegistration, handleCreateRoom } from './handlers/index.js'
+import { handleRegistration, handleCreateRoom, getRoomsListHandler } from './handlers/index.js'
 import { manageGameEvents } from '../helpers/constants.js'
 import { parseJSONData } from '../helpers/utils.js'
-import { User, Room, addUserToRoom } from '../db/index.js'
+import { User, Room, addUserToRoom, getRoomsList } from '../db/index.js'
 
 export function startWebSocketServer(port: number) {
   const server = new WebSocketServer({ port })
@@ -26,15 +26,35 @@ export function startWebSocketServer(port: number) {
         case manageGameEvents.registration:
           console.log('Registration event received:', dataObject)
           currentUser = handleRegistration(ws, dataObject)
+          getRoomsListHandler(ws)
           break
         case manageGameEvents.createRoom:
           console.log('Create room event received:', dataObject)
           currentRoom = handleCreateRoom(ws);
+          console.log('Current room:', currentRoom)
           if (currentUser && currentRoom) {
             addUserToRoom(currentRoom.roomId, {
               name: currentUser.name, id: currentUser.id,
             })
           }
+          getRoomsListHandler(ws)
+          break
+        case manageGameEvents.getRoomsList:
+          console.log('Get rooms list event received:', dataObject)
+          getRoomsListHandler(ws)
+          break
+        case manageGameEvents.addUserToRoom:
+          console.log('Add user to room event received:', dataObject)
+          if (currentUser) {
+            try {
+              addUserToRoom(dataObject.indexRoom, {
+                name: currentUser.name, id: currentUser.id,
+              })
+            } catch (error) {
+              console.error('Error adding user to room:', error)
+            }
+          } 
+  //start game
           break
         default:
           console.log('Unknown event type:', dataObject.type)

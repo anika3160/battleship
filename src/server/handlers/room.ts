@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws'
-import { createRoom } from '../../db/index.js'
+import { createRoom, getRoomsList } from '../../db/index.js'
 import { sendResponse } from '../responses/index.js'
 import { manageGameEvents } from '../../helpers/constants.js'
 
@@ -20,3 +20,7 @@ export function handleCreateRoom(ws: WebSocket) {
   return room
 }
 
+export function getRoomsListHandler(ws: WebSocket, isOnlyOneUserInRoom: boolean = false) {
+    const rooms = getRoomsList(isOnlyOneUserInRoom)
+    sendResponse(ws, manageGameEvents.getRoomsList, rooms)
+}

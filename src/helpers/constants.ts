@@ -5,7 +5,9 @@ export enum gameCommands {
 }
   
 export enum manageGameEvents {
-  registration = "reg",
-  createRoom = "create_room",
+  registration = 'reg',
+  createRoom = 'create_room',
+  getRoomsList = 'update_room',
+  addUserToRoom = 'add_user_to_room',
 }
   
