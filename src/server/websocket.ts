@@ -1,12 +1,13 @@
 import { WebSocket, WebSocketServer } from 'ws'
 import { Room, User } from '../db/models/index.js'
-import { manageGameEvents } from '../utils/constants.js'
+import { gameCommands, manageGameEvents } from '../utils/constants.js'
 import { parseJSONData } from '../utils/utils.js'
 import { handleRegistration } from './handlers/registration.js'
 import { sendErrorResponse } from './responses/error.js'
 import { sendRoomsListResponse } from './responses/index.js'
 import { removeUserSocket } from './wsSessions.js'
 import { handleCreateRoomEvent, handleAddUserToRoomEvent, handleAddShipsEvent } from './events/index.js'
+import { handleAttackEvent } from './events/handleAttackEvent.js'
 
 export function startWebSocketServer(port: number) {
   const server = new WebSocketServer({ port })
@@ -43,6 +44,10 @@ export function startWebSocketServer(port: number) {
 
           case manageGameEvents.addShips:
             handleAddShipsEvent(ws, dataObject, currentUser)
+            break
+
+          case gameCommands.attack:
+            handleAttackEvent(ws, dataObject, currentUser)
             break
 
           default:

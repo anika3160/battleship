@@ -1,4 +1,4 @@
-enum shipsSizes {
+export enum shipsSizes {
   small = 'small',
   medium = 'medium',
   large = 'large',
@@ -17,5 +17,6 @@ export interface Player {
     direction: boolean
     length: number
     type: shipsSizes
+    hits?: { x: number; y: number }[]
   }[]
 }
