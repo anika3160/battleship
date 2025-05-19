@@ -31,14 +31,19 @@ Online implementation of the classic board game "Battleship".
    yarn
    ```
 
-3. Start the development server:
+3. Add .env file:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Start the development server:
    ```bash
    npm run start
    # or
    yarn start
    ```
 
-4. Open the app in your browser at `http://localhost:8181`
+5. Open the app in your browser at `http://localhost:8181`
 
 ## 🎮 How to Play
 
